@@ -353,7 +353,9 @@ exports.issuePrescription = async (req, res, next) => {
         dosage: med.dosage || '1 tablet',
         frequency: med.frequency || 'Once daily',
         duration: med.duration || '5 days',
-        instructions: med.instructions || 'Take after meals'
+        instructions: med.instructions || 'Take after meals',
+        confidenceFlag: 'Verified High Confidence',
+        beforeAfterFood: med.beforeAfterFood || 'After food'
       });
       createdMeds.push(medicineDoc);
 
