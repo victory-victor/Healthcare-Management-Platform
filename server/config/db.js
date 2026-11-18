@@ -37,15 +37,16 @@ const connectDB = async () => {
   try {
     mongoose.set('strictQuery', false);
     const conn = await mongoose.connect(mongoUri, {
-      serverSelectionTimeoutMS: 3000,
+      serverSelectionTimeoutMS: 10000,
     });
     isConnected = true;
     isDevMemoryMode = false;
     console.log(`[MedAI Nexus] MongoDB Connected Successfully: ${conn.connection.host}`);
   } catch (error) {
-    console.warn(`[MedAI Nexus] Notice: MongoDB not reachable at ${mongoUri}.`);
+    const reason = error.message.replace(/mongodb(\+srv)?:\/\/[^\s@]+@/gi, 'mongodb$1://<redacted>@');
+    console.warn(`[MedAI Nexus] MongoDB connection failed (${error.name}): ${reason}`);
     console.log(`[MedAI Nexus] Activating Autonomous Resilient Development Engine (Local In-Memory Persistence Mode).`);
-    console.log(`[MedAI Nexus] Tip: Set MONGODB_URI in server/.env with your MongoDB Atlas connection string when ready for cloud storage.`);
+    console.log(`[MedAI Nexus] Check MONGODB_URI, Atlas network access, and database credentials.`);
     isConnected = false;
     isDevMemoryMode = true;
   }
