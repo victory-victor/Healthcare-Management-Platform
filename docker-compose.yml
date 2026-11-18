@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: medai_nexus_mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: medai_nexus
+    volumes:
+      - mongo_data:/data/db
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: medai_nexus_server
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongodb:27017/medai_nexus
+      - CLIENT_URL=http://localhost:5173
+      - JWT_ACCESS_SECRET=medai_nexus_jwt_access_secret_production_key_38749281
+      - JWT_REFRESH_SECRET=medai_nexus_jwt_refresh_secret_production_key_91827364
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=gemini-2.5-flash
+      - UPLOAD_DIR=uploads
+    depends_on:
+      - mongodb
+    volumes:
+      - ./server/uploads:/app/uploads
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: medai_nexus_client
+    restart: always
+    ports:
+      - "5173:80"
+    depends_on:
+      - server
+
+volumes:
+  mongo_data:
