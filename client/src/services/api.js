@@ -1,6 +1,20 @@
 import axios from 'axios';
 
-const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+// Dynamically resolve Backend API Base URL
+// 1. Checks VITE_API_URL environment variable (from Vercel or .env)
+// 2. Automatically defaults to Render production backend if running on Vercel (*.vercel.app)
+// 3. Defaults to empty string (local Vite proxy /api) in development
+const resolveApiBase = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL.replace(/\/$/, '');
+  }
+  if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+    return 'https://medai-nexus-ca41.onrender.com';
+  }
+  return '';
+};
+
+const apiBase = resolveApiBase();
 
 const api = axios.create({
   baseURL: `${apiBase}/api`,
