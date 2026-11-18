@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const dbAdapter = require('../services/dbAdapter');
-const { isConnected } = require('../config/db');
+const { connectDB, isConnected } = require('../config/db');
 const { generateAccessToken, generateRefreshToken, verifyRefreshToken } = require('../utils/jwt');
 const { logAudit } = require('../middleware/auditLogger');
 
@@ -21,6 +21,10 @@ exports.register = async (req, res, next) => {
 
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, message: 'Name, email, and password are required.' });
+    }
+
+    if (!isConnected()) {
+      await connectDB();
     }
 
     if (!isConnected()) {
